@@ -1,16 +1,12 @@
 {
-  "name": "notes-backend",
+  "name": "backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "server": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "rmdir /S /Q build && cd ../notes-frontend && npm run build --prod && Xcopy build ../notes-backend /e /i /h",
-    "deploy": "git push heroku master",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",    
-    "logs:prod": "heroku logs --tail"
+    "watch": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "elderick",
   "license": "MIT",
