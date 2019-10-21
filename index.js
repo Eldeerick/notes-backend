@@ -42,10 +42,11 @@ app.post('/api/notes', (request, response) => {
    });
  });
 
-app.delete('/api/notes/:id', (req,res) => {
-   const id = Number(req.params.id);
-   notes = notes.filter(note => note.id !== id);
-   res.status(204).end();
+app.delete('/api/notes/:id', (req, res, next) => {
+   Note.findByIdAndDelete(req.params.id).then(response => {
+      res.status(204).end();
+   })
+   .catch(error => next(error));
 });
 
 const PORT =  process.env.PORT;
