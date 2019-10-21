@@ -1,38 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const Note = require('./models/note');
 
 const app = express();
 app.use(cors());
 app.use(express.static('build'));
 app.use(bodyParser.json());
 
-const url =
-<<<<<<< HEAD
-  `mongodb+srv://elderick:<password>@phonebook-yajra.mongodb.net/note-app?retryWrites=true&w=majority`
-=======
-  `mongodb+srv://elderick:fullstack@phonebook-yajra.mongodb.net/note-app?retryWrites=true&w=majority`
-
-mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
-  important: Boolean,
-});
-
-noteSchema.set('toJSON', {
-   transform: (document, returnedObject) => {
-      returnedObject.id = returnedObject._id.toString();
-      delete returnedObject._id;
-      delete returnedObject.__v;
-   }
-});
-
-const Note = mongoose.model('Note', noteSchema)
-
->>>>>>> parent of 6b82ff4... Revert "Get method access database now"
 let notes = [
    {
      id: 1,
@@ -64,22 +40,11 @@ app.get('/api/notes', (req,res) => {
    })
 });
 
-app.get('/api/notes/:id', (req,res) => {
-   const id = Number(req.params.id);
-   const note = notes.find(note => note.id === id);
-   if(note) {
-      res.json(note);
-   } else {
-      res.status(404).end();
-   }
+app.get('/api/notes/:id', (request, response) => {
+   Note.findById(request.params.id).then(note => {
+      response.json(note.toJSON());
+   });
 });
-
-const generateId = () => {
-   const maxId = notes.length > 0 
-   ? Math.max(...notes.map(n => n.id))
-   : 0
-   return maxId + 1;
-}
 
 app.post('/api/notes', (request, response) => {
    const body = request.body;
@@ -88,14 +53,14 @@ app.post('/api/notes', (request, response) => {
          error: 'content missing',
       });
    }
-   const note = {
+   const note = new Note({
       content: body.content,
       important: body.important || false,
       date: new Date(),
-      id: generateId(),
-   }
-   notes = notes.concat(note);
-   response.json(note)
+   });
+   note.save().then(savedNote => {
+      response.json(savedNote.toJSON());
+   });
  });
 
 app.delete('/api/notes/:id', (req,res) => {
@@ -104,7 +69,7 @@ app.delete('/api/notes/:id', (req,res) => {
    res.status(204).end();
 });
 
-const PORT =  process.env.PORT || 3001;
+const PORT =  process.env.PORT;
 app.listen(PORT, () => {
    console.log(`Server running on port ${PORT}`);
 
