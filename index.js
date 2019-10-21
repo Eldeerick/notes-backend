@@ -1,34 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const cors = require('cors');
-
 const app = express();
+const cors = require('cors');
 app.use(cors());
+
 app.use(express.static('build'));
 app.use(bodyParser.json());
 
 const url =
   `mongodb+srv://elderick:fullstack@phonebook-yajra.mongodb.net/note-app?retryWrites=true&w=majority`
-
-mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
-  important: Boolean,
-});
-
-noteSchema.set('toJSON', {
-   transform: (document, returnedObject) => {
-      returnedObject.id = returnedObject._id.toString();
-      delete returnedObject._id;
-      delete returnedObject.__v;
-   }
-});
-
-const Note = mongoose.model('Note', noteSchema)
-
 let notes = [
    {
      id: 1,
@@ -50,17 +30,15 @@ let notes = [
    }
  ]
 
-app.get('/api', (req,res) => {
-   res.send('<h1>Notes API</h1>');
+app.get('/', (req,res) => {
+   res.send('<h1>Hello World!</h1>');
 })
 
-app.get('/api/notes', (req,res) => {
-   Note.find({}).then(notes => {
-      res.json(notes.map(note => note.toJSON()));
-   })
+app.get('/notes', (req,res) => {
+   res.json(notes);
 });
 
-app.get('/api/notes/:id', (req,res) => {
+app.get('/notes/:id', (req,res) => {
    const id = Number(req.params.id);
    const note = notes.find(note => note.id === id);
    if(note) {
@@ -77,7 +55,7 @@ const generateId = () => {
    return maxId + 1;
 }
 
-app.post('/api/notes', (request, response) => {
+app.post('/notes', (request, response) => {
    const body = request.body;
    if(!body.content) {
       return response.status(400).json({
@@ -94,7 +72,7 @@ app.post('/api/notes', (request, response) => {
    response.json(note)
  });
 
-app.delete('/api/notes/:id', (req,res) => {
+app.delete('/notes/:id', (req,res) => {
    const id = Number(req.params.id);
    notes = notes.filter(note => note.id !== id);
    res.status(204).end();
