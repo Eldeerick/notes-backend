@@ -8,7 +8,7 @@ app.use(express.static('build'));
 app.use(bodyParser.json());
 
 const url =
-  `mongodb+srv://elderick:fullstack@phonebook-yajra.mongodb.net/note-app?retryWrites=true&w=majority`
+  `mongodb+srv://elderick:<password>@phonebook-yajra.mongodb.net/note-app?retryWrites=true&w=majority`
 let notes = [
    {
      id: 1,
