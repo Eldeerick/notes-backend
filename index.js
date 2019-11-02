@@ -29,7 +29,7 @@ app.get('/api/notes/:id', (request, response, next) => {
    }).catch(err => next(err))
 });
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
    const body = request.body;
    if (!body.content) {
       return response.status(400).json({
@@ -41,12 +41,15 @@ app.post('/api/notes', (request, response) => {
       important: body.important || false,
       date: new Date(),
    });
-   note.save().then(savedNote => {
-      response.json(savedNote.toJSON());
-   });
+   note.save()
+   .then(savedNote => savedNote.toJSON())
+   .then(savedAndFormattedNote => {
+      response.json(savedAndFormattedNote)
+   })
+   .catch(error => next(error))
 });
 
-app.put('/api/notes/:id', (request, response) => {
+app.put('/api/notes/:id', (request, response, next) => {
    const body = request.body;
    const note = {
       content: body.content,
@@ -67,17 +70,19 @@ app.delete('/api/notes/:id', (req, res, next) => {
 
 const unknownEndpoint = (request, response) => {
    response.status(404).send({ error: 'unknown endpoint' })
- }
- app.use(unknownEndpoint)
+}
+app.use(unknownEndpoint);
 
 const errorHandler = (error, request, response, next) => {
    console.error(error.message)
    if (error.name === 'CastError' && error.kind === 'ObjectId') {
-      return response.status(400).send({ error: 'malformatted id' })
-   }
-   next(error)
+      return response.status(400).send({ error: 'malformatted id' });
+   } else if (error.name === 'ValidationError') {
+      return response.status(400).json({ error: error.message });
+   } 
+   next(error);
 }
-app.use(errorHandler)
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
