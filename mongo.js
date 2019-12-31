@@ -10,7 +10,7 @@ const password = process.argv[2]
 const url =
   `mongodb+srv://elderick:${password}@phonebook-yajra.mongodb.net/note-app?retryWrites=true&w=majority`
 
-mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
+mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true })
 
 const noteSchema = new mongoose.Schema({
   content: String,
@@ -26,7 +26,7 @@ const note = new Note ({
   important: true,
 })
 
-note.save().then(response => {
+note.save().then(() => {
   console.log('note saved!')
   mongoose.connection.close()
 })
