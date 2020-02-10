@@ -14,7 +14,7 @@ beforeEach(async () => {
 
   noteObject = new Note(helper.initialNotes[1])
   await noteObject.save()
-})
+}, 30000)
 
 test('notes are returned as json', async () => {
   await api
@@ -71,9 +71,21 @@ test('note without content is not added', async () => {
     .expect(400)
 
   const notesAtEnd = await helper.notesInDb()
-  console.log(notesAtEnd)
 
   expect(notesAtEnd.length).toBe(helper.initialNotes.length)
+})
+
+test('a specific note can be viewed', async () => {
+  const notesAtStart = await helper.notesInDb()
+
+  const noteToView = notesAtStart[0]
+
+  const resultNote = await api
+    .get(`/api/notes/${noteToView.id}`)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  expect(resultNote.body).toEqual(noteToView)
 })
 
 afterAll(() => {
