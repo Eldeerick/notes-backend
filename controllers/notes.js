@@ -6,7 +6,7 @@ notesRouter.get('/', async (request, response) => {
   response.json(notes.map(note => note.toJSON()))
 })
 
-notesRouter.get('/:id', async (request, response, next) => {
+notesRouter.get('/:id', (request, response, next) => {
   Note.findById(request.params.id)
     .then(note => {
       if (note) {
