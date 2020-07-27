@@ -1,10 +1,12 @@
 const supertest = require('supertest')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
 const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
 
 const Note = require('../models/note')
+const User = require('../models/user')
 
 beforeEach(async () => {
   await Note.deleteMany({})
@@ -56,8 +58,6 @@ describe('viewing a specific note', () => {
 
   test('fails with statuscode 404 if note does not exist', async () => {
     const validNonexistingId = await helper.nonExistingId()
-
-    console.log(validNonexistingId)
 
     await api
       .get(`/api/notes/${validNonexistingId}`)
@@ -165,6 +165,61 @@ test('a note can be deleted', async () => {
   const contents = notesAtEnd.map(r => r.content)
 
   expect(contents).not.toContain(noteToDelete.content)
+})
+
+describe('when there is intially a user in db', () => {
+  beforeEach(async () => {
+    await User.deleteMany()
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'admin', passwordHash })
+
+    await user.save()
+  })
+
+  test('creation succeeds with a fresh username', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'elderick',
+      name: 'Erick Oliveira',
+      password: 'alisdo10',
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+
+    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+
+    const usernames = usersAtEnd.map(user => user.username)
+    expect(usernames).toContain(newUser.username)
+  })
+
+  test('creation fails if username is already taken', async () => {
+    const usersAtStart = helper.usersInDb()
+
+    const newUser = {
+      username: 'admin',
+      name: 'Admin admin',
+      password: 'alisdo10'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('´username´ to be unique')
+
+    const usersAtEnd = helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
 })
 
 afterAll(() => {
