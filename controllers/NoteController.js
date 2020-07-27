@@ -22,6 +22,7 @@ notesRouter.get('/:id', async (request, response, next) => {
 
 notesRouter.post('/', async (request, response, next) => {
   const body = request.body
+
   const user = await User.findById(body.userId)
 
   const note = new Note({
