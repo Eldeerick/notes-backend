@@ -1,12 +1,15 @@
 const config = require('./utils/config')
 const express = require('express')
 const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
 const app = express()
 const cors = require('cors')
+
+const loginRouter = require('./controllers/LoginController')
 const notesRouter = require('./controllers/NoteController')
 const usersRouter = require('./controllers/UserController')
 const middleware = require('./utils/middleware')
-const mongoose = require('mongoose')
+
 const logger = require('./utils/logger')
 
 logger.info('connecting to', config.MONGODB_URI)
@@ -24,6 +27,7 @@ app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(middleware.requestLogger)
 
+app.use('/api/login', loginRouter)
 app.use('/api/notes', notesRouter)
 app.use('/api/users', usersRouter)
 
