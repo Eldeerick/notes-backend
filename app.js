@@ -12,11 +12,11 @@ const middleware = require('./utils/middleware')
 
 const logger = require('./utils/logger')
 
-logger.info('connecting to', config.MONGODB_URI)
+logger.info('Connecting to mongodb...')
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
   .then(() => {
-    logger.info('connected to MongoDB')
+    logger.info('Connection successful!')
   })
   .catch((error) => {
     logger.error('error connection to MongoDB:', error.message)
